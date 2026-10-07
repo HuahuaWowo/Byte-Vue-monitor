@@ -1,4 +1,6 @@
-import useErrorMonitor from "vuemonitor/lib/useErrorMonitor";
-import usePageDuration from "vuemonitor/lib/usePageDuration";
-import usePerformance from "vuemonitor/lib/usePerformance";
+import useErrorMonitor from "./lib/useErrorMonitor.js";
+import usePageDuration from "./lib/usePageDuration.js";
+import usePerformance from "./lib/usePerformance.js";
 export { useErrorMonitor, usePageDuration,usePerformance };
+
+export { createTracker, configureMonitor, SDK_VERSION } from "./utils/tracker.js";

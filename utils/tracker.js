@@ -26,7 +26,7 @@ export function createTracker(options = {}) {
   function prepare(data) {
     let event = sanitize({
       ...data, schemaVersion: 1, sdkVersion: SDK_VERSION, timestamp: Date.now(),
-      url: cleanUrl(data.url || env.location?.href || "", options.allowedQuery),
+      url: cleanUrl(data.url || env.location?.href || "", options.allowedQuery, env.location?.href),
       userAgent: getUserAgent(env.navigator?.userAgent),
     }, privacy);
     if (options.beforeSend) event = options.beforeSend(event);

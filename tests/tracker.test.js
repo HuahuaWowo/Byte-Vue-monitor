@@ -55,3 +55,30 @@ test("beacon fallback, filters, serialization boundaries and destruction", async
   const dropped = createTracker({ endpoint: "https://a.test", beforeSend: () => null });
   assert.equal((await dropped.send()).reason, "filtered");
 });
+
+test("beacon queueing and default tracker configuration have explicit outcomes", async () => {
+  const { default: defaultTracker, configureMonitor } = await import("../utils/tracker.js");
+  assert.equal((await defaultTracker.send()).reason, "not-configured");
+  let fetchCalls = 0;
+  const tracker = configureMonitor({ endpoint: "https://a.test", environment: {
+    navigator: { sendBeacon: () => true },
+    fetch: async () => { fetchCalls++; return { ok: true }; },
+  } });
+  assert.equal((await tracker.send({ kind: "x" }, { beacon: true })).queued, true);
+  assert.equal(fetchCalls, 0);
+  assert.equal((await defaultTracker.send({ kind: "x" })).ok, true);
+  tracker.destroy();
+});
+test("privacy whitelist and custom filter cannot reintroduce forbidden URL fields", async () => {
+  let body;
+  const tracker = createTracker({ endpoint: "/events", environment: {
+    location: { href: "https://a.test/page" },
+    fetch: async (_, options) => { body = JSON.parse(options.body); return { ok: true }; },
+  }, allowedQuery: ["campaign", "token"], allowedParams: ["locale"],
+  beforeSend(event) { event.url = "https://user:pass@a.test/?campaign=ok&token=bad#private"; return event; } });
+  await tracker.send({ kind: "x", params: { locale: "zh", userId: "private" }, password: "private" });
+  assert.equal(body.url, "https://a.test/?campaign=ok");
+  assert.deepEqual(body.params, { locale: "zh" });
+  assert.equal(body.password, "[redacted]");
+  assert.throws(() => createTracker({ endpoint: "https://a.test", allowedParams: "bad" }), /array/);
+});

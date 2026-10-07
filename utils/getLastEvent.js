@@ -1,4 +1,5 @@
 let lastEvent = "";
+export function startEventCapture() {
 ["click", "touchstart", "mousedown", "keydown", "mouseover"].forEach(
   (eventType) => {
     document.addEventListener(
@@ -13,6 +14,7 @@ let lastEvent = "";
     );
   }
 );
+}
 export default function () {
   return lastEvent;
 }

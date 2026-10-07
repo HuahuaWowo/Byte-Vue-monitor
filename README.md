@@ -9,7 +9,7 @@
 需要 Node.js **22.12 或更新版本**和 npm。依赖由 `package-lock.json` 锁定；示例使用 Vue 3.5.43、Vue Router 4.6.4 和 Vite 8.3.3。
 
 ```sh
-git clone --branch codex/monitor-requirements-milestones https://github.com/HuahuaWowo/Byte-Vue-monitor.git
+git clone --branch codex/monitor-functional-history https://github.com/HuahuaWowo/Byte-Vue-monitor.git
 cd Byte-Vue-monitor
 npm ci
 npm run dev

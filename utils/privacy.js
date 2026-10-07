@@ -1,6 +1,7 @@
 const sensitiveKey = /password|passwd|token|secret|authorization|cookie|session|api.?key/i;
 
 export function cleanUrl(value, allowedQuery = [], base = "http://localhost") {
+  if (!value) return "";
   try {
     const url = new URL(String(value), base);
     if (!["http:", "https:"].includes(url.protocol)) return "";

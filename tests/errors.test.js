@@ -61,3 +61,20 @@ test("browser identification checks Chromium variants before Chrome", () => {
   assert.equal(getUserAgent("Chrome/120.0 OPR/103.0"), "OPR/103.0");
   assert.equal(getUserAgent("Firefox/122.0"), "Firefox/122.0");
 });
+
+test("event recorder snapshots composed paths, falls back to parents and releases nodes", async () => {
+  const { createEventRecorder } = await import("../utils/getLastEvent.js");
+  const env = environment(); const recorder = createEventRecorder(env);
+  recorder.start(); recorder.start();
+  const parent = { nodeType: 1, nodeName: "FORM" };
+  const input = { nodeType: 1, nodeName: "INPUT", parentElement: parent };
+  env.document.emit("click", { composedPath: () => [input, parent] });
+  assert.equal(getSelector(recorder.getPath()), "form > input");
+  const copied = recorder.getPath(); copied.reverse();
+  assert.equal(recorder.getPath()[0], input);
+  env.document.emit("keydown", { target: input });
+  assert.deepEqual(recorder.getPath(), [input, parent]);
+  recorder.stop();
+  assert.deepEqual(recorder.getPath(), []);
+  assert.equal(env.document.count(), 0);
+});

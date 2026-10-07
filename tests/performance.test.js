@@ -70,3 +70,18 @@ test("invalid durations stay null, absent TLS is not a misleading zero", () => {
   assert.equal(timingDetails({ connectEnd: 0, connectStart: 10 }).TCP, null);
   assert.equal(timingDetails({ secureConnectionStart: 0, connectEnd: 20 }).TLS, null);
 });
+
+test("default configured tracker excludes its own collector resource entries", async () => {
+  const { configureMonitor } = await import("../utils/tracker.js");
+  const env = environment();
+  const fake = observers(env);
+  const sent = [];
+  env.fetch = async (_, options) => { sent.push(JSON.parse(options.body)); return { ok: true }; };
+  const tracker = configureMonitor({ endpoint: "https://example.test/events", environment: env });
+  const monitor = usePerformance({ environment: env });
+  fake.emit("resource", [{ name: "https://example.test/events", duration: 20 }]);
+  env.fireTimers();
+  await tracker.flush();
+  assert.deepEqual(sent.map(event => event.kind), ["performance"]);
+  monitor.stop(); tracker.destroy();
+});

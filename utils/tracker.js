@@ -92,6 +92,7 @@ export function configureMonitor(options) {
   return next;
 }
 export default {
+  get endpoint() { return current?.endpoint; },
   send: (data, options) => current ? current.send(data, options)
     : Promise.resolve({ ok: false, reason: "not-configured" }),
 };
